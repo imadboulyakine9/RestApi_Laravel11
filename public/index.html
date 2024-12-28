@@ -46,39 +46,117 @@
 <body>
     <div class="container">
         <h1>API Test</h1>
+        
+        <!-- Registration Form -->
         <div class="form-group">
+            <h2>Register</h2>
+            <label for="registerName">Name</label>
+            <input type="text" id="registerName" placeholder="Enter name">
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" placeholder="Enter email">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" placeholder="Enter password">
+            <label for="registerPasswordConfirmation">Confirm Password</label>
+            <input type="password" id="registerPasswordConfirmation" placeholder="Confirm password">
+            <button onclick="register()">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div class="form-group">
+            <h2>Login</h2>
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter email">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password">
+            <button onclick="login()">Login</button>
+        </div>
+
+        <!-- Logout Button -->
+        <div class="form-group">
+            <h2>Logout</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Customer Forms -->
+        <div class="form-group">
+            <h2>Create Customer</h2>
             <label for="name">Name</label>
             <input type="text" id="name" placeholder="Enter name">
-        </div>
-        <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="Enter email">
-        </div>
-        <div class="form-group">
             <button onclick="createCustomer()">Create Customer</button>
         </div>
         <div class="form-group">
+            <h2>Get Customer</h2>
             <label for="customerId">Customer ID</label>
             <input type="text" id="customerId" placeholder="Enter customer ID">
-        </div>
-        <div class="form-group">
             <button onclick="getCustomer()">Get Customer</button>
         </div>
         <div class="form-group">
+            <h2>Update Customer</h2>
             <label for="updateName">Update Name</label>
             <input type="text" id="updateName" placeholder="Enter new name">
-        </div>
-        <div class="form-group">
             <label for="updateEmail">Update Email</label>
             <input type="email" id="updateEmail" placeholder="Enter new email">
-        </div>
-        <div class="form-group">
             <button onclick="updateCustomer()">Update Customer</button>
         </div>
         <div class="response" id="response"></div>
     </div>
 
     <script>
+        let authToken = '';
+
+        async function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const password_confirmation = document.getElementById('registerPasswordConfirmation').value;
+
+            const response = await fetch('http://localhost:8000/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password, password_confirmation }),
+            });
+
+            const data = await response.json();
+            document.getElementById('response').innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const response = await fetch('http://localhost:8000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+            if (data.token) {
+                authToken = data.token;
+            }
+            document.getElementById('response').innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function logout() {
+            const response = await fetch('http://localhost:8000/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                },
+            });
+
+            const data = await response.json();
+            authToken = '';
+            document.getElementById('response').innerText = JSON.stringify(data, null, 2);
+        }
+
         async function createCustomer() {
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
@@ -87,6 +165,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({ name, email }),
             });
@@ -102,6 +181,7 @@
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
                 },
             });
 
@@ -118,6 +198,7 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({ name, email }),
             });
