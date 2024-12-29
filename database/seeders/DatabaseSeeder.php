@@ -22,5 +22,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Article::factory(10)->create();
+
+        $this->call(ArticleSeeder::class);
     }
 }
